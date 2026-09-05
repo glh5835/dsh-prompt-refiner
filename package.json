@@ -23,6 +23,14 @@
   "engines": {
     "node": ">=20"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glh5835/dsh-prompt-refiner.git"
+  },
+  "bugs": {
+    "url": "https://github.com/glh5835/dsh-prompt-refiner/issues"
+  },
+  "homepage": "https://github.com/glh5835/dsh-prompt-refiner#readme",
   "dsh": {
     "client": {
       "platform": "web",
