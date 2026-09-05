@@ -1,0 +1,4 @@
+# 本地开发挂载示例（Cordis loader 条目列表格式）。
+# 在 dsh 开发目录下以本文件为 loader 配置启动时，会把本包挂为插件。
+# 正式安装方式见 README.md（profile 的 cordis.patch.yml 插入行，或动态插件面板）。
+- name: 'dsh-prompt-refiner'

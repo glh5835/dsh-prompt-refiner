@@ -1,0 +1,55 @@
+{
+  "name": "dsh-prompt-refiner",
+  "version": "0.1.0",
+  "description": "DeepSeek Harness 输入栏「提示词精炼」插件：✨ 一键把模糊草稿改写为目标/背景/步骤/要求/[假设] 结构化提示词；成本可路由（默认模型可换成便宜的优化模型）、结果缓存、token 用量统计落盘。静态版为功能主体，动态版免安装尝鲜。",
+  "license": "MIT",
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "src",
+    "cordis.yml",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dsh": {
+    "client": {
+      "platform": "web",
+      "immediately": false,
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-slots"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-client-locale": ">=0.1.0-rc.6",
+    "@deepseek-ai/dsh-client-runtime": ">=0.1.0-rc.6",
+    "@deepseek-ai/dsh-client-ui-slots": ">=0.1.0-rc.6",
+    "react": "^18.2.0"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "cordis",
+    "dynamic-plugin",
+    "prompt",
+    "prompt-refiner"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
