@@ -1,0 +1,5 @@
+# Bundle patch for the DSH plugin manager (dsh >= 0.1.5 plugin page / desktop).
+# Declares the plugin row this package contributes to the profile.
+- insert:
+    - id: dsh-prompt-refiner
+      name: 'dsh-prompt-refiner'

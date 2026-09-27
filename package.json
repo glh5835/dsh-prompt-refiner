@@ -1,6 +1,6 @@
 {
   "name": "dsh-prompt-refiner",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DeepSeek Harness 输入栏「提示词精炼」插件：✨ 一键把模糊草稿改写为目标/背景/步骤/要求/[假设] 结构化提示词；成本可路由（默认模型可换成便宜的优化模型）、结果缓存、token 用量统计落盘。静态版为功能主体，动态版免安装尝鲜。",
   "license": "MIT",
   "type": "module",
@@ -18,6 +18,7 @@
     "lib",
     "src",
     "cordis.yml",
+    "cordis.patch.yml",
     "README.md"
   ],
   "engines": {
@@ -32,6 +33,9 @@
   },
   "homepage": "https://github.com/glh5835/dsh-prompt-refiner#readme",
   "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
       "platform": "web",
       "immediately": false,
