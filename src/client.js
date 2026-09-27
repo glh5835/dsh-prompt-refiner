@@ -41,6 +41,7 @@ function splitAssumptions(s) {
   return { body: rest, assumptions }
 }
 
+/** 面板信息行：模型 · 字数变化 · 耗时 · 缓存 · 思考档位 · token 用量（output 含思考）。 */
 function metaLine(m) {
   if (!m) return ''
   const parts = []
@@ -48,19 +49,31 @@ function metaLine(m) {
   if (m.chars) parts.push(m.chars.before + '→' + m.chars.after + ' 字')
   if (typeof m.latencyMs === 'number') parts.push((m.latencyMs / 1000).toFixed(1) + 's')
   if (m.cached) parts.push('缓存命中')
-  if (m.usage && m.usage.inputTokens != null && m.usage.outputTokens != null) {
-    parts.push(m.usage.inputTokens + '+' + m.usage.outputTokens + ' tok')
+  if (m.reasoningEffortRequested !== undefined) {
+    const requested = m.reasoningEffortRequested
+    const effective = m.reasoningEffort
+    parts.push('思考 ' + (effective === null || effective === undefined ? '默认' : effective) + (requested && effective && requested !== effective ? '（请求 ' + requested + '）' : ''))
+  }
+  if (m.usage) {
+    const inTok = m.usage.inputTokens
+    const outTok = m.usage.outputTokens
+    const reasonTok = m.usage.reasoningTokens
+    const segments = []
+    if (inTok != null) segments.push('入 ' + inTok)
+    if (outTok != null) segments.push('出 ' + outTok + (reasonTok == null ? '（含思考）' : ''))
+    if (reasonTok != null && reasonTok > 0) segments.push('思考 ' + reasonTok)
+    if (segments.length > 0) parts.push(segments.join('/') + ' tok')
   }
   return parts.join(' · ')
 }
 
-const CSS = '.prompt-refine-btn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--dsw-alias-label-secondary);font-size:14px;line-height:1;cursor:pointer;order:1}.prompt-refine-btn:hover:not(:disabled){background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}.prompt-refine-btn:disabled{opacity:.45;cursor:default}.prompt-refine-btn.is-busy{color:var(--dsw-alias-brand-primary)}.prompt-refine-panel{position:absolute;bottom:calc(100% + 8px);left:0;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px solid var(--dsw-alias-border-l1);border-radius:12px;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);font-size:12px;line-height:1.5;box-shadow:var(--dsw-shadow-lv2);overflow:hidden}.prompt-refine-panel.is-loading{justify-content:center;align-items:center;color:var(--dsw-alias-label-secondary)}.prompt-refine-panel.is-error{border-color:var(--dsw-alias-state-error-primary)}.prompt-refine-head{display:flex;flex:none;align-items:center;justify-content:space-between;gap:8px}.prompt-refine-title{font-weight:600;font-size:12px}.prompt-refine-actions{display:inline-flex;gap:6px}.prompt-refine-primary{padding:2px 8px;border:1px solid var(--dsw-alias-border-l2);border-radius:6px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);cursor:pointer;font-size:11px;line-height:1.4}.prompt-refine-primary:hover{border-color:var(--dsw-alias-brand-primary)}.prompt-refine-ghost{padding:2px 8px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--dsw-alias-label-secondary);cursor:pointer;font-size:11px;line-height:1.4}.prompt-refine-ghost:hover{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary)}.prompt-refine-error-text{color:var(--dsw-alias-state-error-primary);flex:1}.prompt-refine-meta{flex:none;font-size:11px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.prompt-refine-assumptions{flex:none;padding:6px 8px;border-radius:8px;background:var(--dsw-alias-state-warning-bg,rgba(234,164,20,.14));color:var(--dsw-alias-label-primary);white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.5}.prompt-refine-assume-label{display:block;margin-bottom:4px;font-weight:600;color:var(--dsw-alias-label-secondary)}.prompt-refine-result{max-height:320px;overflow-y:auto;padding:8px 10px;border-radius:8px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.5}.prompt-refine-orig-toggle{flex:none;font-size:11px;color:var(--dsw-alias-label-secondary)}.prompt-refine-orig-toggle summary{cursor:pointer;user-select:none;list-style-position:inside}.prompt-refine-orig-toggle summary:hover{color:var(--dsw-alias-label-primary)}.prompt-refine-orig{margin-top:6px;max-height:120px;overflow-y:auto;padding:6px 8px;border-radius:6px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.45}'
+const CSS = '.prompt-refine-btn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--dsw-alias-label-secondary);font-size:14px;line-height:1;cursor:pointer;order:1}.prompt-refine-btn:hover:not(:disabled){background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}.prompt-refine-btn:disabled{opacity:.45;cursor:default}.prompt-refine-btn.is-busy{color:var(--dsw-alias-brand-primary)}.prompt-refine-panel{position:absolute;bottom:calc(100% + 8px);left:0;right:0;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px solid var(--dsw-alias-border-l1);border-radius:12px;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);font-size:12px;line-height:1.5;box-shadow:var(--dsw-shadow-lv2);z-index:60;max-height:min(70vh,560px);overflow:hidden}.prompt-refine-panel.is-loading{justify-content:center;align-items:center;color:var(--dsw-alias-label-secondary)}.prompt-refine-panel.is-error{border-color:var(--dsw-alias-state-error-primary)}.prompt-refine-head{display:flex;flex:none;align-items:center;justify-content:space-between;gap:8px}.prompt-refine-title{font-weight:600;font-size:12px}.prompt-refine-actions{display:inline-flex;gap:6px}.prompt-refine-primary{padding:2px 8px;border:1px solid var(--dsw-alias-border-l2);border-radius:6px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);cursor:pointer;font-size:11px;line-height:1.4}.prompt-refine-primary:hover{border-color:var(--dsw-alias-brand-primary)}.prompt-refine-ghost{padding:2px 8px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--dsw-alias-label-secondary);cursor:pointer;font-size:11px;line-height:1.4}.prompt-refine-ghost:hover{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary)}.prompt-refine-error-text{color:var(--dsw-alias-state-error-primary);flex:1}.prompt-refine-meta{flex:none;font-size:11px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.prompt-refine-assumptions{flex:0 1 auto;min-height:0;max-height:180px;overflow-y:auto;padding:6px 8px;border-radius:8px;background:var(--dsw-alias-state-warning-bg,rgba(234,164,20,.14));color:var(--dsw-alias-label-primary);white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.5}.prompt-refine-assume-label{display:block;margin-bottom:4px;font-weight:600;color:var(--dsw-alias-label-secondary)}.prompt-refine-result{flex:1 1 auto;min-height:0;max-height:320px;overflow-y:auto;padding:8px 10px;border-radius:8px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.5}.prompt-refine-orig-toggle{flex:none;font-size:11px;color:var(--dsw-alias-label-secondary)}.prompt-refine-orig-toggle summary{cursor:pointer;user-select:none;list-style-position:inside}.prompt-refine-orig-toggle summary:hover{color:var(--dsw-alias-label-primary)}.prompt-refine-orig{margin-top:6px;max-height:120px;overflow-y:auto;padding:6px 8px;border-radius:6px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.45}'
 
 function PromptRefineButton(props) {
   const store = props.store
   const state = useStore(store)
-  const input = props.useInput((s) => s)
-  const draft = (input && typeof input.draft === 'string') ? input.draft : ''
+  // 选择器返回基本类型：避免返回整个 snapshot 对象时因引用不稳定触发重渲染循环
+  const draft = props.useInput((s) => (s && typeof s.draft === 'string') ? s.draft : '')
   const can = draft.trim().length > 0 && !state.loading
   const onRefine = () => {
     if (!can) return
@@ -91,46 +104,23 @@ function PromptRefineButton(props) {
 function PromptRefinePanel(props) {
   const store = props.store
   const state = useStore(store)
-  const panelRef = React.useRef(null)
-  const [width, setWidth] = React.useState(null)
   React.useEffect(() => {
     if (store.get().sessionId !== props.sessionId) {
       store.set({ loading: false, result: null, error: null, sessionId: props.sessionId })
     }
   }, [props.sessionId])
-  React.useEffect(() => {
-    if (!state.loading && !state.result && !state.error) return
-    const el = panelRef.current
-    if (!el) return
-    const parent = el.parentElement
-    const card = (parent && parent.closest) ? parent.closest('[data-composer-card]') : null
-    const apply = () => {
-      if (!card) {
-        setWidth(680)
-        return
-      }
-      const rect = card.getBoundingClientRect()
-      setWidth(Math.round(rect.width))
-    }
-    apply()
-    if (typeof ResizeObserver === 'undefined' || !card) return
-    const observer = new ResizeObserver(apply)
-    observer.observe(card)
-    return () => observer.disconnect()
-  }, [state.loading, state.result, state.error])
   if (!state.loading && !state.result && !state.error) return null
-  const style = width ? { width: width + 'px' } : { visibility: 'hidden' }
   if (state.loading) {
     return React.createElement(
       'div',
-      { ref: panelRef, className: 'prompt-refine-panel is-loading', style: style },
+      { className: 'prompt-refine-panel is-loading' },
       React.createElement('span', null, '正在精炼提示词…'),
     )
   }
   if (state.error) {
     return React.createElement(
       'div',
-      { ref: panelRef, className: 'prompt-refine-panel is-error', style: style },
+      { className: 'prompt-refine-panel is-error' },
       React.createElement('span', { className: 'prompt-refine-error-text' }, state.error),
       React.createElement(
         'button',
@@ -144,7 +134,7 @@ function PromptRefinePanel(props) {
   const meta = metaLine(result.meta)
   return React.createElement(
     'div',
-    { ref: panelRef, className: 'prompt-refine-panel', style: style },
+    { className: 'prompt-refine-panel' },
     React.createElement(
       'div',
       { className: 'prompt-refine-head' },
