@@ -1,7 +1,7 @@
 # dsh-prompt-refiner
 
 DeepSeek Harness（`dsh`）输入栏「提示词精炼」插件：点击 ✨ 把模糊草稿改写成**目标 / 背景 / 步骤 / 要求 / [假设]** 结构化的可执行提示词，并内置**成本路由、结果缓存、token 用量统计**。
-
+本项目未授权任何第三方平台进行代金券/API额度赠送！
 ## 与 dsh-prompt-optimize-plugin 的差异
 
 社区已有 [dsh-prompt-optimize-plugin](https://github.com/sakka6868/dsh-prompt-optimize-plugin)（MIT），本插件在其验证过的 UI 通道上补齐它没做的成本控制层：
